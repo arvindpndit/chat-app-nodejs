@@ -4,6 +4,8 @@ const socketio = require("socket.io");
 
 const connect = require("./config/database-config");
 
+const Chat = require("./models/chat");
+
 const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
@@ -15,8 +17,15 @@ io.on("connection", (socket) => {
         socket.join(data.roomId);
     });
 
-    socket.on("msg_send", (data) => {
-        console.log(data);
+    socket.on("msg_send", async (data) => {
+        //console.log(data);
+
+        const chat = await Chat.create({
+            roomId: data.roomId,
+            user: data.username,
+            content: data.msg,
+        });
+
         io.to(data.roomId).emit("msg_received", data);
     });
 });
@@ -24,10 +33,15 @@ io.on("connection", (socket) => {
 app.set("view engine", "ejs");
 app.use("/", express.static(__dirname + "/public"));
 
-app.get("/chat/:roomId", (req, res) => {
+app.get("/chat/:roomId", async (req, res) => {
+    const chats = await Chat.find({
+        roomId: req.params.roomId,
+    }).select("content user");
+    console.log(chats);
     res.render("index", {
         name: "Arvind",
         roomId: req.params.roomId,
+        chats: chats,
     });
 });
 

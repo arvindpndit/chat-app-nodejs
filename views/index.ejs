@@ -16,19 +16,23 @@
     <input type="text" name="" id="newmsg" placeholder="message...">
     <button id="btn">Send</button>
 
-    <ul id="msglist"></ul>
+    <ul id="msglist">
+        <% for(var i=0; i < chats.length; i++) { %>           
+              <li><%= chats[i].user %> : <%= chats[i].content %></li>            
+         <% } %>
+    </ul>
     
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var socket = io();
 
-        const btn = document.getElementById("btn");
-        const startChat = document.getElementById("start-chat");
-        const username = document.getElementById("username");
-        const msg = document.getElementById("newmsg");
-        const msgList = document.getElementById("msglist");
+        let btn = document.getElementById("btn");
+        let startChat = document.getElementById("start-chat");
+        let username = document.getElementById("username");
+        let msg = document.getElementById("newmsg");
+        let msgList = document.getElementById("msglist");
 
-        console.log("username is ",  username.value);
+        
 
         socket.emit("join_room", {
                 roomId: startChat.getAttribute("data")
@@ -37,10 +41,15 @@
         btn.onclick = () => {
             socket.emit("msg_send", {
                 msg: msg.value,
+                user: username.value,
                 roomId: startChat.getAttribute("data")
             });
-        };
 
+            msg.value = "";
+            username.value = ""
+        };
+        
+        console.log("username is ",  username.value);
         socket.on("msg_received", (data) => {
             let msgItem = document.createElement("li");
             msgItem.innerText = `${data.username} : ${data.msg}`;
