@@ -18,15 +18,19 @@ io.on("connection", (socket) => {
     });
 
     socket.on("msg_send", async (data) => {
-        //console.log(data);
+        console.log(data);
 
         const chat = await Chat.create({
             roomId: data.roomId,
-            user: data.username,
+            user: data.user,
             content: data.msg,
         });
 
         io.to(data.roomId).emit("msg_received", data);
+    });
+
+    socket.on("typing", (data) => {
+        io.to(data.roomId).emit("someone_typing");
     });
 });
 

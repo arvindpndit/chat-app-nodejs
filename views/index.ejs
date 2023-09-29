@@ -12,8 +12,10 @@
     <br>
 
     <input id="start-chat" type="hidden" data="<%= roomId %>"></input>
-    <input type="text" id="username" placeholder="UserName">
+    <div id="typing">typing...</div>
+    <input type="text" id="name" placeholder="UserName">
     <input type="text" name="" id="newmsg" placeholder="message...">
+
     <button id="btn">Send</button>
 
     <ul id="msglist">
@@ -28,7 +30,10 @@
 
         let btn = document.getElementById("btn");
         let startChat = document.getElementById("start-chat");
-        let username = document.getElementById("username");
+        let username = document.getElementById("name");
+        let typing = document.getElementById("typing");
+        console.log(typing)
+        typing.style.display = "none";
         let msg = document.getElementById("newmsg");
         let msgList = document.getElementById("msglist");
 
@@ -44,9 +49,10 @@
                 user: username.value,
                 roomId: startChat.getAttribute("data")
             });
-
+            console.log(username.value)
             msg.value = "";
             username.value = ""
+            typing.style.display = "none";
         };
         
         console.log("username is ",  username.value);
@@ -55,6 +61,16 @@
             msgItem.innerText = `${data.username} : ${data.msg}`;
             msgList.appendChild(msgItem);
         });
+
+        socket.on("someone_typing", ()=> {
+            typing.style.display = "block";
+        })
+
+        msg.addEventListener("keypress", (e) => {
+            socket.emit("typing", {
+                roomId: startChat.getAttribute("data")
+            });
+        })
 
     </script>
 </body>
